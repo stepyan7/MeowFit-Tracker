@@ -1,0 +1,160 @@
+import React, { useState } from 'react';
+import { UserData, BodyPart, WorkoutSource } from '../types';
+import { ACTIVITY_LEVELS } from '../constants';
+import CategoryManager from './CategoryManager';
+import { Tag, User, LayoutGrid, ChevronRight } from 'lucide-react';
+
+interface SettingsViewProps {
+  userData: UserData;
+  setUserData: (data: UserData) => void;
+  bodyParts: BodyPart[];
+  setBodyParts: (items: BodyPart[]) => void;
+  sources: WorkoutSource[];
+  setSources: (items: WorkoutSource[]) => void;
+}
+
+const SettingsView: React.FC<SettingsViewProps> = ({ 
+  userData, setUserData, 
+  bodyParts, setBodyParts, 
+  sources, setSources 
+}) => {
+  const [showTagManager, setShowTagManager] = useState(false);
+
+  // Chevron SVG for select background
+  const selectBgStyle = {
+    backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E")`,
+    backgroundPosition: 'right 1rem center',
+    backgroundSize: '20px 20px',
+    backgroundRepeat: 'no-repeat'
+  };
+
+  return (
+    <div className="p-4 space-y-6 pb-24 animate-in fade-in duration-500">
+      <header className="flex justify-between items-end px-2">
+        <div>
+          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Profile</h2>
+          <p className="text-sm font-medium text-gray-400">Manage your body & library.</p>
+        </div>
+        <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+          <User className="text-indigo-600 w-6 h-6" />
+        </div>
+      </header>
+      
+      <section className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-5">
+        <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-2">
+          <User size={14} strokeWidth={3}/> Biometrics
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Age</label>
+            <input 
+              type="number" 
+              value={userData.age} 
+              onChange={(e) => setUserData({...userData, age: parseInt(e.target.value) || 0})}
+              className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Weight (kg)</label>
+              <input 
+                type="number" 
+                value={userData.weight} 
+                onChange={(e) => setUserData({...userData, weight: parseFloat(e.target.value) || 0})}
+                className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Height (cm)</label>
+              <input 
+                type="number" 
+                value={userData.height} 
+                onChange={(e) => setUserData({...userData, height: parseInt(e.target.value) || 0})}
+                className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Activity Level</label>
+            <select 
+              value={userData.activityLevel}
+              onChange={(e) => setUserData({...userData, activityLevel: parseFloat(e.target.value)})}
+              style={selectBgStyle}
+              className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 appearance-none transition-all border-none"
+            >
+              {ACTIVITY_LEVELS.map(lvl => (
+                <option key={lvl.value} value={lvl.value}>{lvl.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-2">
+            <LayoutGrid size={14} strokeWidth={3}/> Category Management
+          </h3>
+          <button 
+            onClick={() => setShowTagManager(!showTagManager)}
+            className="text-[10px] font-black text-indigo-500 uppercase flex items-center gap-1 hover:underline"
+          >
+            {showTagManager ? 'Hide Manager' : 'Manage Tags'} <ChevronRight size={12} className={`transition-transform ${showTagManager ? 'rotate-90' : ''}`}/>
+          </button>
+        </div>
+
+        {showTagManager ? (
+          <div className="space-y-8 animate-in slide-in-from-top-4 duration-300">
+            <CategoryManager 
+              title="Body Focus List" 
+              items={bodyParts} 
+              setItems={setBodyParts} 
+            />
+            <div className="h-px bg-gray-50" />
+            <CategoryManager 
+              title="Sources List" 
+              items={sources} 
+              setItems={setSources} 
+            />
+          </div>
+        ) : (
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+            {bodyParts.slice(0, 4).map(part => (
+              <span key={part} className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-3 py-1 rounded-full whitespace-nowrap">{part}</span>
+            ))}
+            {bodyParts.length > 4 && (
+              <span className="text-[10px] font-black text-gray-300 px-3 py-1">+ {bodyParts.length - 4} more</span>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
+        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Mock Activity</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <button 
+            onClick={() => setUserData({...userData, workoutsDone: userData.workoutsDone + 1})}
+            className="bg-indigo-600 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-indigo-100"
+          >
+            Log 1 Workout
+          </button>
+          <button 
+            onClick={() => setUserData({...userData, workoutsDone: 0, dailySteps: 500, caloriesConsumed: 800})}
+            className="bg-gray-50 text-gray-500 py-4 rounded-2xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all"
+          >
+            Reset Day
+          </button>
+        </div>
+      </section>
+
+      <div className="text-center pt-4">
+        <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">MeowFit v1.1.1 • Stability Update</p>
+      </div>
+    </div>
+  );
+};
+
+export default SettingsView;

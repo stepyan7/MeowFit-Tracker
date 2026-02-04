@@ -1,0 +1,8 @@
+{
+  "name": "MeowFit - Fitness Tracker",
+  "description": "A mobile-first fitness application featuring an adaptive cat mascot, BMR/TDEE tracking, and comprehensive workout management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
