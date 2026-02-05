@@ -1,8 +1,8 @@
 {
   "name": "MeowFit",
   "short_name": "MeowFit",
-  "start_url": "index.html",
-  "scope": ".",
+  "start_url": "/?standalone=true",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#F9FAFB",
   "theme_color": "#6366F1",
