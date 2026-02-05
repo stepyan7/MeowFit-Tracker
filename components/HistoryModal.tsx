@@ -1,7 +1,11 @@
 
 import React, { useState, useMemo } from 'react';
 import { PlannerGoal, DailyCompletion, Workout } from '../types';
-import { X, Calendar, ChevronLeft, ChevronRight, Flame, CheckCircle2, Circle, History, PawPrint } from 'lucide-react';
+import { 
+  X, Calendar, ChevronLeft, ChevronRight, Flame, 
+  CheckCircle2, Circle, History, PawPrint,
+  ChessQueen, BicepsFlexed, Smile, Cat, Angry, MoonStar 
+} from 'lucide-react';
 
 interface HistoryModalProps {
   goals: PlannerGoal[];
@@ -15,7 +19,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
   const [showCalendar, setShowCalendar] = useState(false);
   
   const getDayCompletionStats = (dateKey: string, dow: number) => {
-    const goalsForDay = goals.filter(g => g.targetDays.includes(dow));
+    const goalsForDay = goals.filter(g => {
+      if (g.type === 'specific') return g.date === dateKey;
+      return g.targetDays.includes(dow);
+    });
     if (goalsForDay.length === 0) return { rate: 1, isRest: true };
     const completedIds = completions[dateKey] || [];
     const count = goalsForDay.filter(g => completedIds.includes(g.id)).length;
@@ -24,23 +31,21 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
 
   const getHeatmapColor = (rate: number, isRest: boolean) => {
     if (isRest) return 'bg-gray-50 border-gray-100 text-gray-400';
-    // 100% Completion: Theme Purple (Indigo)
     if (rate === 1) return 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-100';
-    // 1-99% Completion: Indigo gradient
     if (rate >= 0.75) return 'bg-indigo-400 border-indigo-400 text-white';
     if (rate >= 0.5) return 'bg-indigo-300 border-indigo-300 text-white';
     if (rate >= 0.25) return 'bg-indigo-200 border-indigo-200 text-indigo-800';
     if (rate > 0) return 'bg-indigo-100 border-indigo-100 text-indigo-900';
-    // 0% Completion: Light Red
     return 'bg-red-50 border-red-100 text-red-500';
   };
 
-  const getDayMood = (rate: number, isRest: boolean) => {
-    if (isRest) return '✨';
-    if (rate >= 0.8) return '😻';
-    if (rate >= 0.5) return '🐱';
-    if (rate >= 0.2) return '😿';
-    return '😾';
+  const MoodIcon = ({ rate, isRest, className = "w-6 h-6" }: { rate: number, isRest: boolean, className?: string }) => {
+    if (isRest) return <MoonStar className={`${className} text-sky-400`} />;
+    if (rate >= 1) return <ChessQueen className={`${className} text-indigo-600`} />;
+    if (rate >= 0.8) return <BicepsFlexed className={`${className} text-emerald-500`} />;
+    if (rate >= 0.6) return <Smile className={`${className} text-amber-500`} />;
+    if (rate >= 0.4) return <Cat className={`${className} text-orange-500`} />;
+    return <Angry className={`${className} text-rose-500`} />;
   };
 
   const getStatusTextColor = (item: { rate: number, isRest: boolean }) => {
@@ -69,7 +74,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
       const { rate, isRest } = getDayCompletionStats(key, dow);
       return {
         key, date: d, rate, calories: calculateCaloriesForDay(key),
-        mood: getDayMood(rate, isRest), isRest
+        isRest
       };
     });
   }, [goals, completions, workouts]);
@@ -107,7 +112,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
   const renderDailyDetail = (dateKey: string) => {
     const date = new Date(dateKey);
     const dow = date.getDay();
-    const dayGoals = goals.filter(g => g.targetDays.includes(dow));
+    const dayGoals = goals.filter(g => {
+      if (g.type === 'specific') return g.date === dateKey;
+      return g.targetDays.includes(dow);
+    });
     const dayCompletions = completions[dateKey] || [];
     const totalCals = calculateCaloriesForDay(dateKey);
     const { rate, isRest } = getDayCompletionStats(dateKey, dow);
@@ -129,9 +137,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
         </div>
 
         <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 flex items-center justify-between">
-          <div>
-            <h4 className="text-2xl font-black text-gray-800">{getDayMood(rate, isRest)}</h4>
-            <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Daily Spirit</p>
+          <div className="flex flex-col items-center">
+            <MoodIcon rate={rate} isRest={isRest} className="w-8 h-8" />
+            <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-2">Daily Spirit</p>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-1 justify-end text-orange-500">
@@ -228,7 +236,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ goals, completions, workout
                     className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:border-indigo-100 hover:bg-indigo-50/20 transition-all flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-2xl">{item.mood}</div>
+                      <div className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-xl group-hover:bg-white transition-colors">
+                        <MoodIcon rate={item.rate} isRest={item.isRest} className="w-6 h-6" />
+                      </div>
                       <div className="text-left">
                         <p className="text-xs font-black text-gray-700">
                           {item.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
