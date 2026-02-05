@@ -38,22 +38,19 @@ export const DEFAULT_SOURCES: WorkoutSource[] = [
 ];
 
 export enum NekoMood {
-  EXCELLENT = 'Excellent',
-  SATISFACTION = 'Satisfaction',
-  GOOD = 'Good',
-  MOTIVATIONAL = 'Motivational',
-  GUILT = 'Guilt',
-  ANGRY = 'Angry',
-  CHILL = 'Chill',
-  IGNORANCE = 'Ignorance',
-  MONDAY = 'Monday',
-  LAZY = 'Lazy',
-  YOGA = 'Yoga',
-  STRETCH = 'Stretch',
-  NIGHTOWL = 'Nightowl',
-  HAPPY = 'Happy',
-  BORED = 'Bored',
-  LAZY_CAT = 'LazyCat'
+  EXCELLENT = 'EXCELLENT',
+  SATISFACTION = 'SATISFACTION',
+  GOOD = 'GOOD',
+  MOTIVATIONAL = 'MOTIVATIONAL',
+  GUILT = 'GUILT',
+  ANGRY = 'ANGRY',
+  CHILL = 'CHILL',
+  IGNORANCE = 'IGNORANCE',
+  MONDAY = 'MONDAY',
+  LAZY = 'LAZY',
+  YOGA = 'YOGA',
+  STRETCH = 'STRETCH',
+  NIGHTOWL = 'NIGHTOWL'
 }
 
 export interface Workout {
