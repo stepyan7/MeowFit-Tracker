@@ -5,7 +5,7 @@ import WorkoutCard from './WorkoutCard';
 import PreviewModal from './PreviewModal';
 import { 
   Plus, Search, X, Link as LinkIcon, Upload, Check, 
-  Loader2, SlidersHorizontal, Flame, Info, Heart
+  Loader2, SlidersHorizontal, Flame, Info, Heart, Layers
 } from 'lucide-react';
 import { resizeImage, captureVideoThumbnail } from '../utils/mediaProcessing';
 import { saveMedia } from '../utils/db';
@@ -70,6 +70,7 @@ const WorkoutGuide: React.FC<WorkoutGuideProps> = ({
     setIsModalOpen(false);
     setEditingWorkout(null);
     setUploadMode('link');
+    setNewSource(sources[0] || WorkoutSource.EQUIPMENT);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +119,9 @@ const WorkoutGuide: React.FC<WorkoutGuideProps> = ({
       id: editingWorkout?.id || Math.random().toString(36).substr(2, 9),
       name: newName,
       bodyPart: newPart,
-      source: uploadMode === 'link' ? WorkoutSource.YOUTUBE : WorkoutSource.UPLOAD,
+      // If manually linked/uploaded, we could auto-set source, 
+      // but if the user picks a category, we use that.
+      source: newSource, 
       caloriesBurned: parseInt(newCals) || 0,
       youtubeUrl: uploadMode === 'link' ? newUrl : undefined,
       thumbnailUrl: previewMedia || undefined,
@@ -325,11 +328,18 @@ const WorkoutGuide: React.FC<WorkoutGuideProps> = ({
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Calories (kcal)</label>
-                  <div className="relative">
-                    <Flame className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-orange-400" />
-                    <input type="number" placeholder="Optional" className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-9 pr-3 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none" value={newCals} onChange={(e) => setNewCals(e.target.value)} />
-                  </div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Source Category</label>
+                  <select className="w-full bg-gray-50 border-none rounded-2xl py-3 px-3 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none appearance-none" value={newSource} onChange={(e) => setNewSource(e.target.value as WorkoutSource)}>
+                    {sources.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Calories (kcal)</label>
+                <div className="relative">
+                  <Flame className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-orange-400" />
+                  <input type="number" placeholder="Optional" className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-9 pr-3 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none" value={newCals} onChange={(e) => setNewCals(e.target.value)} />
                 </div>
               </div>
 
