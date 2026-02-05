@@ -122,13 +122,6 @@ const TrackerView: React.FC<TrackerViewProps> = ({
         />
       </div>
 
-      <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-[2rem] shadow-lg text-white mx-2">
-        <h4 className="text-lg font-black tracking-tight italic">Dojo Spirit</h4>
-        <p className="text-indigo-100 text-[11px] leading-relaxed mt-1 opacity-90">
-          Every drill checked is a step closer to a Buff Cat.
-        </p>
-      </div>
-
       {previewWorkout && (
         <PreviewModal workout={previewWorkout} onClose={() => setPreviewWorkout(null)} />
       )}

@@ -1,0 +1,4 @@
+# 忽略所有在 images 資料夾的變動，除非是手動加入的
+/public/assets/images/*
+!/public/assets/images/.gitkeep
+!/public/assets/images/*.png
