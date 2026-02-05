@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <script>
-  // 強制註銷所有 Service Workers
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) {
-        registration.unregister();
-      }
-    });
-  }
-  // 清除 Cache Storage
-  if ('caches' in window) {
-    caches.keys().then(function(names) {
-      for (let name of names) caches.delete(name);
-    });
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MeowFit</title>
   
+  <!-- Updated base to relative for better subdirectory support -->
+  <base href="./">
+  <link rel="canonical" href=""> <!-- Note: Update this with your actual URL if known -->
+  
+  <!-- 強制註銷不穩定的 Service Workers (如有) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+  </script>
+
   <!-- iOS PWA Standalone Mode Support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="MeowFit">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/stepyan7/MeowFit_Assets/main/images/app_icon.png">
   
-  <!-- PWA Manifest -->
+  <!-- PWA Manifest - Path remains ./manifest.json as per instruction -->
   <link rel="manifest" href="./manifest.json">
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,6 +41,8 @@
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
       -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
     .hide-scrollbar::-webkit-scrollbar {
       display: none;
