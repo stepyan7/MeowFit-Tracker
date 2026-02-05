@@ -410,7 +410,6 @@ const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onD
             </div>
           )}
 
-          {/* Type Toggle */}
           <div className="bg-gray-100 p-1.5 rounded-2xl flex">
             <button 
               type="button" 
