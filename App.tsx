@@ -34,11 +34,23 @@ const App: React.FC = () => {
     const savedWorkouts = loadWorkouts();
     setWorkouts(savedWorkouts.length ? savedWorkouts : INITIAL_WORKOUTS);
 
-    const savedParts = localStorage.getItem('meowfit_bodyparts');
-    setBodyParts(savedParts ? JSON.parse(savedParts) : DEFAULT_BODY_PARTS);
-    
-    const savedSources = localStorage.getItem('meowfit_sources');
-    setSources(savedSources ? JSON.parse(savedSources) : DEFAULT_SOURCES);
+    // Unified Category Loading
+    const savedCategories = localStorage.getItem('meowfit_categories');
+    if (savedCategories) {
+      try {
+        const { bodyParts: savedParts, sources: savedSources } = JSON.parse(savedCategories);
+        if (savedParts) setBodyParts(savedParts);
+        if (savedSources) setSources(savedSources);
+      } catch (e) {
+        console.error("Failed to parse categories", e);
+      }
+    } else {
+      // Legacy or default fallback
+      const savedParts = localStorage.getItem('meowfit_bodyparts');
+      const savedSources = localStorage.getItem('meowfit_sources');
+      setBodyParts(savedParts ? JSON.parse(savedParts) : DEFAULT_BODY_PARTS);
+      setSources(savedSources ? JSON.parse(savedSources) : DEFAULT_SOURCES);
+    }
 
     const savedGoals = localStorage.getItem('meowfit_planner_goals');
     setPlannerGoals(savedGoals ? JSON.parse(savedGoals) : []);
@@ -46,6 +58,13 @@ const App: React.FC = () => {
     const savedCompletions = localStorage.getItem('meowfit_completions');
     setDailyCompletions(savedCompletions ? JSON.parse(savedCompletions) : {});
   }, []);
+
+  // Category Persistence
+  useEffect(() => {
+    if (bodyParts.length > 0 || sources.length > 0) {
+      localStorage.setItem('meowfit_categories', JSON.stringify({ bodyParts, sources }));
+    }
+  }, [bodyParts, sources]);
 
   useEffect(() => {
     localStorage.setItem('meowfit_planner_goals', JSON.stringify(plannerGoals));

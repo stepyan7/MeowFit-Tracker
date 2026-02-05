@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UserData, BodyPart, WorkoutSource } from '../types';
 import { ACTIVITY_LEVELS } from '../constants';
@@ -20,79 +21,18 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 }) => {
   const [showTagManager, setShowTagManager] = useState(false);
 
-  // Chevron SVG for select background
-  const selectBgStyle = {
-    backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E")`,
-    backgroundPosition: 'right 1rem center',
-    backgroundSize: '20px 20px',
-    backgroundRepeat: 'no-repeat'
-  };
-
   return (
     <div className="p-4 space-y-6 pb-24 animate-in fade-in duration-500">
       <header className="flex justify-between items-end px-2">
         <div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Profile</h2>
-          <p className="text-sm font-medium text-gray-400">Manage your body & library.</p>
+          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Settings</h2>
+          <p className="text-sm font-medium text-gray-400">Manage your library & data.</p>
         </div>
         <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-          <User className="text-indigo-600 w-6 h-6" />
+          <LayoutGrid className="text-indigo-600 w-6 h-6" />
         </div>
       </header>
       
-      <section className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-5">
-        <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-2">
-          <User size={14} strokeWidth={3}/> Biometrics
-        </h3>
-        
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Age</label>
-            <input 
-              type="number" 
-              value={userData.age} 
-              onChange={(e) => setUserData({...userData, age: parseInt(e.target.value) || 0})}
-              className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Weight (kg)</label>
-              <input 
-                type="number" 
-                value={userData.weight} 
-                onChange={(e) => setUserData({...userData, weight: parseFloat(e.target.value) || 0})}
-                className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Height (cm)</label>
-              <input 
-                type="number" 
-                value={userData.height} 
-                onChange={(e) => setUserData({...userData, height: parseInt(e.target.value) || 0})}
-                className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all border-none"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Activity Level</label>
-            <select 
-              value={userData.activityLevel}
-              onChange={(e) => setUserData({...userData, activityLevel: parseFloat(e.target.value)})}
-              style={selectBgStyle}
-              className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-50 appearance-none transition-all border-none"
-            >
-              {ACTIVITY_LEVELS.map(lvl => (
-                <option key={lvl.value} value={lvl.value}>{lvl.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </section>
-
       <section className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -151,7 +91,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       </section>
 
       <div className="text-center pt-4">
-        <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">MeowFit v1.1.1 • Stability Update</p>
+        <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">MeowFit v1.1.2 • Refined Settings</p>
       </div>
     </div>
   );
