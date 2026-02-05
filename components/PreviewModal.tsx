@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Workout, WorkoutSource } from '../types';
-import { X, Flame, Calendar, Dumbbell, Play, Info, ExternalLink } from 'lucide-react';
+import { X, Play, ExternalLink, Dumbbell } from 'lucide-react';
 import { getMedia } from '../utils/db';
 
 interface PreviewModalProps {
@@ -11,12 +11,14 @@ interface PreviewModalProps {
 
 const PreviewModal: React.FC<PreviewModalProps> = ({ workout, onClose }) => {
   const [localMediaUrl, setLocalMediaUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
 
   useEffect(() => {
     const fetchLocalMedia = async () => {
       if (workout.mediaId) {
         const blob = await getMedia(workout.mediaId);
         if (blob) {
+          setMediaType(blob.type.startsWith('video/') ? 'video' : 'image');
           const url = URL.createObjectURL(blob);
           setLocalMediaUrl(url);
           return () => URL.revokeObjectURL(url);
@@ -34,111 +36,89 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ workout, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300" 
+        onClick={onClose} 
+      />
       
-      <div className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        {/* Close Button */}
+      <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[85vh] sm:h-auto">
+        {/* Close Button - Floating */}
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-all"
+          className="absolute top-5 right-5 z-20 p-2.5 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-all active:scale-90"
         >
           <X size={20} />
         </button>
 
-        {/* Media Section */}
-        <div className="aspect-video bg-black flex items-center justify-center overflow-hidden">
+        {/* 1. Media Preview Area (Major portion) */}
+        <div className="flex-grow bg-black flex items-center justify-center overflow-hidden relative">
           {workout.youtubeUrl ? (
             isYouTube(workout.youtubeUrl) ? (
               <iframe 
                 src={getEmbedUrl(workout.youtubeUrl)} 
-                className="w-full h-full" 
+                className="w-full h-full border-none" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowFullScreen
                 title={workout.name}
               />
             ) : (
-              <div className="flex flex-col items-center gap-4 text-white">
-                <ExternalLink size={48} className="text-indigo-400" />
-                <div className="text-center">
-                  <p className="text-sm font-bold">External Web Source</p>
-                  <p className="text-[10px] text-gray-400 mb-4">Site prevents embedding or is a blog/article.</p>
+              <div className="flex flex-col items-center gap-6 p-10 text-center animate-in fade-in duration-500">
+                <div className="w-20 h-20 bg-indigo-600/20 rounded-[2rem] flex items-center justify-center text-indigo-400">
+                  <ExternalLink size={40} />
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-xl font-black text-white">External Resource</h4>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Web article or external guide</p>
                   <a 
                     href={workout.youtubeUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-full text-xs font-black uppercase tracking-widest transition-all inline-flex items-center gap-2"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
                   >
-                    Visit Site <ExternalLink size={14} />
+                    Open Source Site <ExternalLink size={16} />
                   </a>
                 </div>
               </div>
             )
           ) : localMediaUrl ? (
-            <video 
-              src={localMediaUrl} 
-              controls 
-              autoPlay 
-              className="w-full h-full object-contain"
-            />
+            mediaType === 'video' ? (
+              <video 
+                src={localMediaUrl} 
+                controls 
+                autoPlay 
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <img 
+                src={localMediaUrl} 
+                className="w-full h-full object-contain animate-in fade-in duration-500" 
+                alt={workout.name}
+              />
+            )
           ) : (
-            <div className="flex flex-col items-center gap-2 text-white/50">
-              <Play size={48} className="animate-pulse" />
-              <span className="text-xs font-bold uppercase tracking-widest">No Media Playback</span>
+            <div className="flex flex-col items-center gap-3 text-white/20">
+              <Dumbbell size={64} className="animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">No Visual Preview</span>
             </div>
           )}
         </div>
 
-        {/* Info Section */}
-        <div className="p-8 space-y-6">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100">
+        {/* 2. Info Layout (Single row below media) */}
+        <div className="px-8 py-6 bg-white shrink-0">
+          <div className="flex items-center justify-between gap-4">
+            <h3 className="text-xl font-black text-gray-800 tracking-tight truncate flex-1">
+              {workout.name}
+            </h3>
+            <div className="flex items-center gap-2 text-right shrink-0">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                 {workout.bodyPart}
               </span>
-              <h3 className="text-3xl font-black text-gray-800 tracking-tight leading-tight">
-                {workout.name}
-              </h3>
+              <div className="w-1 h-1 bg-gray-200 rounded-full" />
+              <span className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter">
+                {workout.source}
+              </span>
             </div>
-            {workout.caloriesBurned > 0 && (
-              <div className="flex flex-col items-center bg-orange-50 p-3 rounded-2xl border border-orange-100">
-                <Flame className="text-orange-500 w-6 h-6 mb-1" fill="currentColor" />
-                <span className="text-xs font-black text-gray-800">{workout.caloriesBurned}</span>
-                <span className="text-[8px] font-bold text-orange-400 uppercase">kcal</span>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-3xl border border-gray-100 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
-                <Calendar size={18} className="text-gray-400" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Added on</span>
-                <span className="text-xs font-bold text-gray-700">
-                  {new Date(workout.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-3xl border border-gray-100 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
-                <Dumbbell size={18} className="text-gray-400" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Source</span>
-                <span className="text-xs font-bold text-gray-700">
-                  {workout.source}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-indigo-600/5 p-4 rounded-3xl border border-indigo-100 flex items-start gap-3">
-            <Info className="text-indigo-600 w-4 h-4 mt-0.5" />
-            <p className="text-[11px] font-medium text-indigo-900 leading-relaxed">
-              Drill safely! Ensure proper form before increasing weights or intensity. Keep that Cat Dojo spirit!
-            </p>
           </div>
         </div>
       </div>
