@@ -16,24 +16,47 @@ interface TrackerViewProps {
   workouts: Workout[];
 }
 
+// ✨ 輔助函數：統一日期格式，避免時差
+const getLocalDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const ProgressSection: React.FC<{ goals: PlannerGoal[], completions: DailyCompletion }> = ({ goals, completions }) => {
   const { daily, weekly } = useMemo(() => {
     const today = new Date();
-    const todayKey = today.toISOString().split('T')[0];
+    const todayKey = getLocalDateKey(today); // 👈 修正
     const todayDay = today.getDay();
 
-    // Daily Calc
-    const todayGoals = goals.filter(g => g.targetDays.includes(todayDay));
+    // 1. Daily Calc (修正過濾邏輯)
+    const todayGoals = goals.filter(g => {
+      if (g.type === 'specific') return g.date === todayKey;
+      return g.targetDays.includes(todayDay);
+    });
+    
     const dailyDone = todayGoals.filter(g => (completions[todayKey] || []).includes(g.id)).length;
     const dailyRate = todayGoals.length === 0 ? 0 : Math.round((dailyDone / todayGoals.length) * 100);
 
-    // Weekly Calc
-    const first = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
+    // 2. Weekly Calc (修正過濾邏輯)
+    // 獲取本週一的日期
+    const dayOfW = today.getDay();
+    const diff = today.getDate() - dayOfW + (dayOfW === 0 ? -6 : 1);
+    const monday = new Date(today.getFullYear(), today.getMonth(), diff);
+
     let totalNeeded = 0, totalDone = 0;
     for (let i = 0; i < 7; i++) {
-      const d = new Date(new Date(first).setDate(new Date(first).getDate() + i));
-      const dKey = d.toISOString().split('T')[0];
-      const dGoals = goals.filter(g => g.targetDays.includes(d.getDay()));
+      const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+      const dKey = getLocalDateKey(d);
+      const dow = d.getDay();
+      
+      // 過濾該日應有的目標：具體日期匹配 OR 循環日期匹配
+      const dGoals = goals.filter(g => {
+        if (g.type === 'specific') return g.date === dKey;
+        return g.targetDays.includes(dow);
+      });
+
       totalNeeded += dGoals.length;
       totalDone += (completions[dKey] || []).filter(id => dGoals.some(g => g.id === id)).length;
     }
@@ -89,7 +112,6 @@ const TrackerView: React.FC<TrackerViewProps> = ({
         </div>
         
         <div className="flex items-center gap-6 relative z-10">
-          {/* 左側：貓咪縮小一半 (w-1/3) */}
           <div className="w-1/3 min-w-[120px]">
             <CatState 
               userData={userData} 
@@ -99,7 +121,6 @@ const TrackerView: React.FC<TrackerViewProps> = ({
             />
           </div>
 
-          {/* 右側：進度條 */}
           <ProgressSection 
             goals={plannerGoals} 
             completions={dailyCompletions} 
@@ -117,8 +138,13 @@ const TrackerView: React.FC<TrackerViewProps> = ({
         </div>
         
         <WorkoutPlanner 
-          goals={plannerGoals} completions={dailyCompletions} onToggle={onToggleCompletion} 
-          onAdd={onAddGoal} onDelete={onDeleteGoal} workouts={workouts} onPreviewWorkout={setPreviewWorkout}
+          goals={plannerGoals} 
+          completions={dailyCompletions} 
+          onToggle={onToggleCompletion} 
+          onAdd={onAddGoal} 
+          onDelete={onDeleteGoal} 
+          workouts={workouts} 
+          onPreviewWorkout={setPreviewWorkout}
         />
       </div>
 

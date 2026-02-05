@@ -71,8 +71,17 @@ export interface Workout {
 export interface PlannerGoal {
   id: string;
   name: string;
-  workoutId?: string; // Reference to Dojo item
-  targetDays: number[]; // 0-6 (Sun-Sat)
+  workoutId?: string; 
+  
+  // ✨ 核心修改：區分任務類型
+  type: 'recurring' | 'specific'; 
+  
+  // 如果是 recurring，使用 targetDays (0-6)
+  targetDays: number[]; 
+  
+  // 如果是 specific，使用具體日期 (YYYY-MM-DD)
+  date?: string; 
+
   sets?: string;
   reps?: string;
   duration?: string;

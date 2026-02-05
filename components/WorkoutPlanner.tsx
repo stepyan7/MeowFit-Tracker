@@ -3,7 +3,8 @@ import React, { useState, useMemo } from 'react';
 import { PlannerGoal, DailyCompletion, Workout } from '../types';
 import { 
   Plus, Check, Trash2, Settings2, CalendarDays, PawPrint, 
-  Circle, ChevronRight, X, Search, Dumbbell, PlayCircle, History
+  Circle, ChevronRight, X, Search, Dumbbell, PlayCircle, History,
+  Calendar
 } from 'lucide-react';
 import HistoryModal from './HistoryModal';
 
@@ -43,7 +44,12 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({
   const getDayCompletionStats = (date: Date) => {
     const key = date.toISOString().split('T')[0];
     const dow = date.getDay();
-    const dayGoals = goals.filter(g => g.targetDays.includes(dow));
+    // Filter for goals that fall on this day (either recurring or specific to this date)
+    const dayGoals = goals.filter(g => {
+      if (g.type === 'specific') return g.date === key;
+      return g.targetDays.includes(dow);
+    });
+    
     if (dayGoals.length === 0) return { rate: 0, isRest: true };
     
     const dayCompletions = completions[key] || [];
@@ -53,18 +59,20 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({
 
   const getHeatmapColor = (rate: number, isRest: boolean) => {
     if (isRest) return 'bg-gray-50 border-gray-100 text-gray-300';
-    // 100% Completion: Deep Theme Purple (Indigo)
     if (rate === 1) return 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 text-white';
-    // 1-99% Completion: Indigo gradient scaling with depth
     if (rate >= 0.75) return 'bg-indigo-400 border-indigo-400 text-white';
     if (rate >= 0.5) return 'bg-indigo-300 border-indigo-300 text-white';
     if (rate >= 0.25) return 'bg-indigo-200 border-indigo-200 text-indigo-800';
     if (rate > 0) return 'bg-indigo-100 border-indigo-100 text-indigo-700';
-    // 0% Completion: Light Red (Missed Day)
     return 'bg-red-50 border-red-100 text-red-500';
   };
 
-  const todayGoals = goals.filter(g => g.targetDays.includes(dayOfWeek));
+  // Support both recurring and specific types for current day view
+  const todayGoals = goals.filter(g => {
+    if (g.type === 'specific') return g.date === todayKey;
+    return g.targetDays.includes(dayOfWeek);
+  });
+
   const completedToday = completions[todayKey] || [];
 
   return (
@@ -157,6 +165,9 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({
                       <h4 className={`text-xs font-black truncate ${completedToday.includes(goal.id) ? 'text-green-700 line-through opacity-60' : 'text-gray-800'}`}>
                         {goal.name}
                       </h4>
+                      {goal.type === 'specific' && (
+                        <span className="text-[8px] font-black px-1.5 py-0.5 bg-amber-100 text-amber-600 rounded uppercase">Once</span>
+                      )}
                     </div>
                     {(goal.sets || goal.reps || goal.duration) && (
                       <p className="text-[10px] font-bold text-gray-400 mt-0.5">
@@ -225,7 +236,9 @@ interface GoalSettingsModalProps {
 const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onDelete, onClose, workouts }) => {
   const [name, setName] = useState('');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState('');
+  const [type, setType] = useState<'recurring' | 'specific'>('recurring');
   const [targetDays, setTargetDays] = useState<number[]>([]);
+  const [specificDate, setSpecificDate] = useState(new Date().toISOString().split('T')[0]);
   const [sets, setSets] = useState('');
   const [reps, setReps] = useState('');
   const [duration, setDuration] = useState('');
@@ -250,12 +263,14 @@ const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onD
       ? workouts.find(w => w.id === selectedWorkoutId)?.name 
       : name.trim();
 
-    if (finalName && targetDays.length > 0) {
+    if (finalName && (type === 'specific' ? specificDate : targetDays.length > 0)) {
       onAdd({
         id: Math.random().toString(36).substr(2, 9),
         name: finalName,
         workoutId: selectedWorkoutId || undefined,
-        targetDays,
+        type,
+        targetDays: type === 'recurring' ? targetDays : [],
+        date: type === 'specific' ? specificDate : undefined,
         sets: sets || undefined,
         reps: reps || undefined,
         duration: duration || undefined
@@ -285,12 +300,18 @@ const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onD
             <div className="space-y-2">
               {goals.map(goal => (
                 <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100/50">
-                  <div>
-                    <p className="text-xs font-black text-gray-700">{goal.name}</p>
-                    <div className="flex gap-1 mt-1">
-                      {goal.targetDays.map(d => (
-                        <span key={d} className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">{days[d]}</span>
-                      ))}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-gray-700 truncate">{goal.name}</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {goal.type === 'recurring' ? (
+                        goal.targetDays.map(d => (
+                          <span key={d} className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">{days[d]}</span>
+                        ))
+                      ) : (
+                        <span className="text-[8px] font-black text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
+                          <Calendar size={8} /> {goal.date}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <button onClick={() => onDelete(goal.id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
@@ -389,23 +410,55 @@ const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onD
             </div>
           )}
 
+          {/* Type Toggle */}
+          <div className="bg-gray-100 p-1.5 rounded-2xl flex">
+            <button 
+              type="button" 
+              onClick={() => setType('recurring')} 
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'recurring' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-400'}`}
+            >
+              Recurring
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setType('specific')} 
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'specific' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-400'}`}
+            >
+              One-Time
+            </button>
+          </div>
+
           <div className="space-y-3">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Target Days</p>
-            <div className="flex justify-between gap-1">
-              {days.map((d, i) => (
-                <button 
-                  key={i}
-                  onClick={() => toggleDay(i)}
-                  className={`flex-1 h-10 rounded-xl text-[10px] font-black transition-all ${
-                    targetDays.includes(i) 
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' 
-                    : 'bg-gray-50 text-gray-300 border border-gray-100/50 hover:border-indigo-100'
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+              {type === 'recurring' ? 'Target Days' : 'Target Date'}
+            </p>
+            {type === 'recurring' ? (
+              <div className="flex justify-between gap-1">
+                {days.map((d, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => toggleDay(i)}
+                    className={`flex-1 h-10 rounded-xl text-[10px] font-black transition-all ${
+                      targetDays.includes(i) 
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' 
+                      : 'bg-gray-50 text-gray-300 border border-gray-100/50 hover:border-indigo-100'
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="relative group">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-indigo-400 transition-colors" />
+                <input 
+                  type="date" 
+                  className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none"
+                  value={specificDate}
+                  onChange={(e) => setSpecificDate(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -425,7 +478,7 @@ const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ goals, onAdd, onD
 
           <button 
             onClick={handleAdd}
-            disabled={(!name.trim() && !selectedWorkoutId) || targetDays.length === 0}
+            disabled={(!name.trim() && !selectedWorkoutId) || (type === 'recurring' ? targetDays.length === 0 : !specificDate)}
             className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:shadow-none"
           >
             <Plus size={16} strokeWidth={3} /> Add to Schedule

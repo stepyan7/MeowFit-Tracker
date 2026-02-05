@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { NekoMood, UserData, DailyCompletion, PlannerGoal, Workout } from '../types';
+import { NekoMood, UserData, DailyCompletion, PlannerGoal, Workout, BodyPart } from '../types';
 
 const NekoData = {
   [NekoMood.EXCELLENT]: {
@@ -8,7 +8,7 @@ const NekoData = {
   },
   [NekoMood.SATISFACTION]: {
     images: ['img_satisfaction_01', 'img_satisfaction_02', 'img_satisfaction_03', 'img_satisfaction_04', 'img_satisfaction_05'],
-    bubbles: ["罐罐吃起來特別香喵～", "看來你還記得有這App喵。", "我的尾巴在愉悅擺動喵。", "你今天完成了你的目標，我也完成了我的目標：督促你～喵。"],
+    bubbles: ["罐罐吃起來特別香喵～", "看來你還記得有這App喵。", "我的尾巴在愉悅擺動喵。", "你今天完成了你的目標 喵", "我也完成了我的目標：督促你～喵。"],
   },
   [NekoMood.GOOD]: {
     images: ['img_good_01', 'img_good_02', 'img_good_03', 'img_good_04', 'img_good_05'],
@@ -20,7 +20,7 @@ const NekoData = {
   },
   [NekoMood.GUILT]: {
     images: ['img_guilt_01', 'img_guilt_02', 'img_guilt_03', 'img_guilt_04', 'img_guilt_05'],
-    bubbles: ["心虛的眼神我聞到了喵。", "你就繼續假裝沒看到我喵。", "良心不會痛嗎喵？", "你別以為我不知道你心裡在想什麼，你的罪惡感快溢出螢幕了喵。", "看你現在這副樣子...我都替你感到尷尬了喵。"],
+    bubbles: ["心虛的眼神我聞到了喵。", "你就繼續假裝沒看到我喵。", "良心不會痛嗎喵？", "你別以為我不知道你心裡在想什麼", "你的罪惡感快溢出螢幕了喵。", "看你現在這副樣子...我都替你感到尷尬了喵。"],
   },
   [NekoMood.ANGRY]: {
     images: ['img_angry_01', 'img_angry_02', 'img_angry_03', 'img_angry_04', 'img_angry_05'],
@@ -32,11 +32,11 @@ const NekoData = {
   },
   [NekoMood.IGNORANCE]: {
     images: ['img_ignorance_01', 'img_ignorance_02', 'img_ignorance_03', 'img_ignorance_04', 'img_ignorance_05'],
-    bubbles: ["喔？你剛才說了什麼嗎？我只聽到我的肚子在叫喵。", "你的存在感，比我掉的毛還稀薄⋯⋯喵。", "我就靜靜地看著你裝傻，看你能撐多久 喵。"],
+    bubbles: ["喔？你剛才說了什麼嗎？", "我只聽到我的肚子在叫喵。", "你的存在感，比我掉的毛還稀薄⋯⋯喵。", "我就靜靜地看著你裝傻，看你能撐多久 喵。"],
   },
   [NekoMood.MONDAY]: {
     images: ['img_monday_01', 'img_monday_02', 'img_monday_03', 'img_monday_04', 'img_monday_05'],
-    bubbles: ["星期一憂鬱我理解喵。", "是因為週一憂鬱還是因為懶喵？", "如果是因為星期一而貪懶，我就要亮爪子了喵。"],
+    bubbles: ["星期一憂鬱我理解喵。", "是因為週一憂鬱還是因為懶喵？", "如果是因為星期一而貪懶，我就要亮爪子了喵. "],
     quotes: ["星期一憂鬱我理解喵。"]
   },
   [NekoMood.LAZY]: {
@@ -107,8 +107,9 @@ const CatState: React.FC<{
         const goal = plannerGoals.find(g => g.id === id);
         return workouts.find(w => w.id === goal?.workoutId);
     });
-    if (todayWorkouts.some(w => w?.source === 'Yoga')) return NekoMood.YOGA;
-    if (todayWorkouts.some(w => w?.source === 'Stretch')) return NekoMood.STRETCH;
+    // Check bodyPart instead of source for Yoga and Stretch moods as source is WorkoutSource and does not contain 'Yoga' or 'Stretch'
+    if (todayWorkouts.some(w => w?.bodyPart === BodyPart.YOGA)) return NekoMood.YOGA;
+    if (todayWorkouts.some(w => w?.bodyPart === BodyPart.STRETCH)) return NekoMood.STRETCH;
     if (isRestDay) return NekoMood.CHILL;
     if (dayOfWeek === 1 && todayProgress === 0) return NekoMood.MONDAY;
     if (hour >= 12 && todayProgress === 0) return NekoMood.LAZY;
