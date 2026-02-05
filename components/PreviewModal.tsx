@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Workout, WorkoutSource } from '../types';
-import { X, Flame, Calendar, Dumbbell, Play, Info } from 'lucide-react';
+import { X, Flame, Calendar, Dumbbell, Play, Info, ExternalLink } from 'lucide-react';
 import { getMedia } from '../utils/db';
 
 interface PreviewModalProps {
@@ -26,14 +26,11 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ workout, onClose }) => {
     fetchLocalMedia();
   }, [workout.mediaId]);
 
+  const isYouTube = (url: string) => url.includes('youtube.com') || url.includes('youtu.be');
+
   const getEmbedUrl = (url: string) => {
     const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
     return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-  };
-
-  const isVideoFile = (url: string | null) => {
-    // Basic check for video blob types or extensions if available
-    return true; // Assume true for captured video file blobs
   };
 
   return (
@@ -52,13 +49,31 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ workout, onClose }) => {
         {/* Media Section */}
         <div className="aspect-video bg-black flex items-center justify-center overflow-hidden">
           {workout.youtubeUrl ? (
-            <iframe 
-              src={getEmbedUrl(workout.youtubeUrl)} 
-              className="w-full h-full" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowFullScreen
-              title={workout.name}
-            />
+            isYouTube(workout.youtubeUrl) ? (
+              <iframe 
+                src={getEmbedUrl(workout.youtubeUrl)} 
+                className="w-full h-full" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+                title={workout.name}
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-white">
+                <ExternalLink size={48} className="text-indigo-400" />
+                <div className="text-center">
+                  <p className="text-sm font-bold">External Web Source</p>
+                  <p className="text-[10px] text-gray-400 mb-4">Site prevents embedding or is a blog/article.</p>
+                  <a 
+                    href={workout.youtubeUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-full text-xs font-black uppercase tracking-widest transition-all inline-flex items-center gap-2"
+                  >
+                    Visit Site <ExternalLink size={14} />
+                  </a>
+                </div>
+              </div>
+            )
           ) : localMediaUrl ? (
             <video 
               src={localMediaUrl} 

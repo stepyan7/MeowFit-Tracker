@@ -172,7 +172,7 @@ const WorkoutGuide: React.FC<WorkoutGuideProps> = ({
         {/* Search & Filter Toggle */}
         <div className="flex gap-3 px-2">
           <div className="relative flex-1 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-indigo-600 transition-colors" />
             <input 
               type="text" 
               placeholder="Search drills..." 
@@ -295,7 +295,7 @@ const WorkoutGuide: React.FC<WorkoutGuideProps> = ({
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Source Link</label>
                   <div className="relative">
                     <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                    <input type="text" placeholder="YouTube URL" className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-11 pr-4 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} />
+                    <input type="text" placeholder="Enter URL (YouTube, Instagram, Blog, etc.)" className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-11 pr-4 text-sm font-bold focus:ring-4 focus:ring-indigo-100 outline-none" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} />
                   </div>
                 </div>
               ) : (

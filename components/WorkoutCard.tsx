@@ -13,8 +13,13 @@ interface WorkoutCardProps {
 
 const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onPreview, onEdit, onDelete, onToggleFavorite }) => {
   const getYouTubeThumbnail = (url: string) => {
-    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
-    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) return null;
+    try {
+      const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+      return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+    } catch {
+      return null;
+    }
   };
 
   const SourceIcon = {
@@ -55,6 +60,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onPreview, onEdit, o
             src={displayThumb} 
             className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
             alt={workout.name}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
