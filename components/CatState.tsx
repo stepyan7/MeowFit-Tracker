@@ -77,7 +77,7 @@ const CatState: React.FC<{
       <div className="w-full aspect-square relative flex items-center justify-center">
         <img 
           key={imageId} 
-          src={`/assets/images/${imageId}.png`} 
+          src={`https://raw.githubusercontent.com/stepyan7/MeowFit-Tracker/main/public/assets/images/${imageId}.png`} 
           alt="Cat Coach"
           className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-110"
           onError={(e) => {
