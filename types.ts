@@ -6,7 +6,9 @@ export enum BodyPart {
   SHOULDERS = 'Shoulders',
   ARMS = 'Arms',
   CORE = 'Core',
-  FULL_BODY = 'Full Body'
+  FULL_BODY = 'Full Body',
+  YOGA = 'Yoga',
+  STRETCH = 'Stretch'
 }
 
 export enum WorkoutSource {
@@ -23,7 +25,9 @@ export const DEFAULT_BODY_PARTS: BodyPart[] = [
   BodyPart.SHOULDERS,
   BodyPart.ARMS,
   BodyPart.CORE,
-  BodyPart.FULL_BODY
+  BodyPart.FULL_BODY,
+  BodyPart.YOGA,
+  BodyPart.STRETCH
 ];
 
 export const DEFAULT_SOURCES: WorkoutSource[] = [
@@ -34,13 +38,22 @@ export const DEFAULT_SOURCES: WorkoutSource[] = [
 ];
 
 export enum NekoMood {
+  EXCELLENT = 'Excellent',
+  SATISFACTION = 'Satisfaction',
+  GOOD = 'Good',
+  MOTIVATIONAL = 'Motivational',
+  GUILT = 'Guilt',
+  ANGRY = 'Angry',
+  CHILL = 'Chill',
+  IGNORANCE = 'Ignorance',
+  MONDAY = 'Monday',
   LAZY = 'Lazy',
+  YOGA = 'Yoga',
+  STRETCH = 'Stretch',
+  NIGHTOWL = 'Nightowl',
   HAPPY = 'Happy',
-  SPORTY = 'Sporty',
-  BUFF = 'Buff',
-  EXCITED = 'Excited',
   BORED = 'Bored',
-  ANGRY = 'Angry'
+  LAZY_CAT = 'LazyCat'
 }
 
 export interface Workout {
